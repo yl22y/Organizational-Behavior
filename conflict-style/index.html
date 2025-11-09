@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Conflict Management Style Simulation</title>
+<style>
+  :root { 
+    --fsu-garnet: #782F40;
+    --fsu-gold: #CEB888;
+    --gap: 14px; 
+    --radius: 14px; 
+  }
+  body { 
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    margin: 0;
+    background: #ffffff;
+    color: #111111;
+  }
+  .wrap { max-width: 980px; margin: 32px auto; padding: 0 16px; }
+  .card { 
+    background: #fafafa;
+    border: 1px solid #e5e7eb;
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: 0 4px 14px rgba(0,0,0,.08);
+  }
+  h1, h2 { color: var(--fsu-garnet); margin-top: 0; }
+  p.muted { color:#444; margin-top:0; }
+  .grid { display:grid; grid-template-columns: 1fr; gap: var(--gap); }
+  .item { background:#ffffff; border:1px solid #e5e7eb; border-radius: var(--radius); padding: 16px;}
+  .prompt { margin-bottom: 10px; font-weight:600; line-height:1.3; }
+  .scale { display:flex; gap:10px; align-items:center; flex-wrap: wrap;}
+  .scale label { font-size:.9rem; color:#333; }
+  .radios { display:flex; gap:10px; flex-wrap: wrap;}
+  .radios input { accent-color: var(--fsu-garnet); }
+  .progress { height:10px; border-radius:999px; background:#e5e7eb; overflow:hidden; margin: 18px 0 8px;}
+  .bar { height:100%; width:0%; background: var(--fsu-garnet); transition:width .2s ease;}
+  .row { display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap;}
+  button { 
+    background: var(--fsu-garnet); 
+    color:white; 
+    border:none; 
+    border-radius:12px; 
+    padding:10px 16px; 
+    font-weight:600; 
+    cursor:pointer;
+  }
+  button:disabled { opacity:.6; cursor:not-allowed; }
+  .ghost { background:#ffffff; border:2px solid var(--fsu-garnet); color:var(--fsu-garnet); }
+  table { width:100%; border-collapse: collapse; margin-top: 8px;}
+  th, td { text-align:left; padding:10px; border-bottom:1px solid #e5e7eb;}
+  th { color: var(--fsu-garnet); }
+  .pill { 
+    display:inline-block; 
+    padding:4px 10px; 
+    border-radius:999px; 
+    background: var(--fsu-gold); 
+    border:1px solid var(--fsu-garnet); 
+    font-size:.85rem; 
+    color: var(--fsu-garnet); 
+    font-weight:600;
+  }
+  .hint { color: var(--fsu-garnet); }
+  .two { display:grid; grid-template-columns: 1fr; gap: var(--gap); }
+  @media(min-width: 900px){ .two { grid-template-columns: 1.1fr .9fr; } }
+  .small { font-size:.9rem; color:#555; }
+  i { color: var(--fsu-garnet); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>Conflict Management Style Simulation</h1>
+    <p class="muted">Rate 25 statements from <b>1</b> (Strongly Disagree) to <b>5</b> (Strongly Agree). You’ll get your scores for the five styles—Competing, Collaborating, Compromising, Avoiding, and Accommodating—plus personalized feedback.</p>
+
+    <div class="progress"><div id="bar" class="bar"></div></div>
+    <div class="row">
+      <div class="small"><span id="count">0</span>/25 completed</div>
+      <div class="small">1 = Strongly Disagree · 3 = Neutral · 5 = Strongly Agree</div>
+    </div>
+  </div>
+
+  <div id="form" class="grid" style="margin-top:16px;"></div>
+
+  <div class="row" style="margin:16px 0 32px;">
+    <button id="submit" disabled>Calculate My Styles</button>
+    <button id="clear" class="ghost">Clear Responses</button>
+  </div>
+
+  <div id="results" class="two" style="display:none;">
+    <div class="card">
+      <h2>Your Results</h2>
+      <div class="row">
+        <div><span class="pill">Dominant: <span id="dominant"></span></span></div>
+        <div><span class="pill">Secondary: <span id="secondary"></span></span></div>
+      </div>
+      <table>
+        <thead><tr><th>Style</th><th>Score</th><th>% of Max</th><th>Interpretation</th></tr></thead>
+        <tbody id="table"></tbody>
+      </table>
+      <p class="small">Note: Scores are out of 25 (5 items × 5 max per item). % = Score ÷ 25 × 100.</p>
+    </div>
+
+    <div class="card">
+      <h2>Feedback on Your Dominant Style</h2>
+      <div id="fb-dominant"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const items = [
+  "I try to satisfy my own needs even if it means pushing others.",
+  "I try to find a solution that satisfies both of us.",
+  "I look for a compromise to settle the conflict.",
+  "I avoid open discussions of disagreement.",
+  "I give in to others’ wishes to keep the peace.",
+  "I defend my position strongly.",
+  "I explore ideas together until we find a win-win solution.",
+  "I suggest splitting the difference to reach an agreement.",
+  "I prefer not to confront people about differences.",
+  "I accommodate the other person’s view to maintain harmony.",
+  "I assert my ideas even when others disagree.",
+  "I seek cooperation from others to find mutually beneficial outcomes.",
+  "I find middle ground when differences arise.",
+  "I postpone addressing conflict until a better time.",
+  "I yield to others’ preferences to preserve relationships.",
+  "I take a firm stand for what I believe is right.",
+  "I discuss differences openly to find common goals.",
+  "I negotiate a fair solution where both sides gain something.",
+  "I avoid situations where conflict could occur.",
+  "I let others take the lead in resolving disagreements.",
+  "I compete to achieve my goals, even if it creates tension.",
+  "I collaborate to ensure all voices are heard.",
+  "I look for an acceptable compromise under time pressure.",
+  "I stay silent rather than risk an argument.",
+  "I smooth things over to keep relationships comfortable."
+];
+
+const styleMap = {
+  Competing: [0,5,10,15,20],
+  Collaborating: [1,6,11,16,21],
+  Compromising: [2,7,12,17,22],
+  Avoiding: [3,8,13,18,23],
+  Accommodating: [4,9,14,19,24]
+};
+
+const feedback = {
+  Competing: "You’re assertive and decisive. Use this for urgent or ethical situations—but be mindful of relationship impact.",
+  Collaborating: "You seek win–win outcomes through open dialogue. Excellent for complex, high-stakes issues but can be time-intensive.",
+  Compromising: "You balance assertiveness and cooperation. Great for quick solutions but may overlook deeper issues.",
+  Avoiding: "You value peace and reflection. Helpful for cooling off, but long-term avoidance can allow issues to fester.",
+  Accommodating: "You maintain harmony and relationships. Useful for low-stakes conflicts, but avoid suppressing your own needs."
+};
+
+const adjustAdvice = {
+  Competing: "When stakes are interpersonal, pivot to collaborating: surface interests first, then propose options.",
+  Collaborating: "Under time pressure, shift to compromising: define a fair midpoint with a revisit date.",
+  Compromising: "If values are central, move toward collaborating: brainstorm options before splitting differences.",
+  Avoiding: "If the issue keeps returning, schedule time to talk and start with small, low-risk topics.",
+  Accommodating: "State one need you’ll advocate for early and use ‘I statements’ for clarity."
+};
+
+/* --- Build form --- */
+const form=document.getElementById('form'),count=document.getElementById('count'),bar=document.getElementById('bar'),submitBtn=document.getElementById('submit'),clearBtn=document.getElementById('clear');
+function makeItem(i,t){const d=document.createElement('div');d.className='item';d.innerHTML=`<div class="prompt">${i+1}. ${t}</div><div class="scale"><div class="radios">${[1,2,3,4,5].map(v=>`<label><input type="radio" name="q${i}" value="${v}"> ${v}</label>`).join('')}</div></div>`;return d;}
+items.forEach((t,i)=>form.appendChild(makeItem(i,t)));
+function getResponses(){return items.map((_,i)=>{const c=document.querySelector(`input[name="q${i}"]:checked`);return c?parseInt(c.value):null;});}
+function updateProgress(){const v=getResponses();const f=v.filter(x=>x!==null).length;count.textContent=f;bar.style.width=(f/items.length*100)+'%';submitBtn.disabled=f!==items.length;}
+form.addEventListener('change',updateProgress);clearBtn.addEventListener('click',()=>{form.querySelectorAll('input[type=radio]').forEach(i=>i.checked=false);updateProgress();});
+updateProgress();
+
+/* --- Results --- */
+const resultsWrap=document.getElementById('results'),tableBody=document.getElementById('table'),domSpan=document.getElementById('dominant'),secSpan=document.getElementById('secondary'),fbDom=document.getElementById('fb-dominant');
+function sum(idxs,a){return idxs.reduce((s,i)=>s+a[i],0);}
+function pctOfMax(s){return s/25;}
+function interpret(p){return p>=.8?"Very High":p>=.6?"High":p>=.4?"Moderate":p>=.2?"Low":"Very Low";}
+submitBtn.addEventListener('click',()=>{
+  const v=getResponses();
+  if(v.some(x=>x===null)){alert("Please complete all 25 items.");return;}
+  const results={};
+  for(const[k,idxs]of Object.entries(styleMap)){results[k]=sum(idxs,v);}
+  const sorted=Object.entries(results).sort((a,b)=>b[1]-a[1]);
+  const top=sorted[0][1];
+  const tiedTop=sorted.filter(([_,s])=>s===top).map(([k])=>k);
+  const dominant=tiedTop.join(', ');
+  const secScore=sorted.find(([_,s])=>s<top)?.[1]??top;
+  const tiedSec=sorted.filter(([_,s])=>s===secScore).map(([k])=>k);
+  const secondary=tiedSec.join(', ');
+  domSpan.textContent=dominant; secSpan.textContent=secondary;
+  tableBody.innerHTML='';
+  for(const[style,score]of sorted){
+    const p=pctOfMax(score);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${style}</td><td>${score}</td><td>${(p*100).toFixed(0)}%</td><td>${interpret(p)}</td>`;
+    tableBody.appendChild(tr);
+  }
+  const domFirst=dominant.split(', ')[0];
+  fbDom.innerHTML = `
+    <p><b>Dominant style: ${domFirst}.</b> ${feedback[domFirst]}</p>
+    <p><i>Here’s how you can adjust your approach when your dominant style isn’t ideal for the situation:</i></p>
+    <p>${adjustAdvice[domFirst]}</p>
+  `;
+  resultsWrap.style.display='';
+  window.scrollTo({top:resultsWrap.offsetTop-12,behavior:'smooth'});
+});
+</script>
+</body>
+</html>
