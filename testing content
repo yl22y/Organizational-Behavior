@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Task Performance, OCB, and Voice – Click-Through Lesson</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg: #f3f4f6;
+      --panel: #ffffff;
+      --ink: #111827;
+      --muted: #6b7280;
+      --accent: #1f6feb;
+      --accent-soft: rgba(31,111,235,0.08);
+      --radius: 18px;
+      --shadow: 0 18px 45px rgba(15,23,42,0.12);
+      --maxw: 980px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 32px 16px 64px;
+      font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      background: radial-gradient(circle at top, #e5e7eb 0, #f9fafb 40%, #e5e7eb 100%);
+      color: var(--ink);
+      display: flex;
+      justify-content: center;
+    }
+
+    .shell {
+      width: 100%;
+      max-width: var(--maxw);
+      background: linear-gradient(135deg,#0b1120,#111827);
+      border-radius: 32px;
+      padding: 2px;
+      box-shadow: var(--shadow);
+    }
+
+    .app {
+      border-radius: 30px;
+      background: var(--panel);
+      padding: 24px 20px 20px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    header h1 {
+      font-size: 1.2rem;
+      margin: 0;
+      font-weight: 650;
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    header h1 span.badge {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    header .meta {
+      text-align: right;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .progress-bar {
+      position: relative;
+      margin-bottom: 16px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: #f3f4f6;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .progress-track {
+      flex: 1;
+      height: 6px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg,#1f6feb,#60a5fa);
+      transition: width 0.25s ease;
+    }
+
+    .progress-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      min-width: 120px;
+      text-align: right;
+    }
+
+    main {
+      border-radius: 18px;
+      background: #f9fafb;
+      padding: 18px 16px 20px;
+      min-height: 260px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .slide {
+      display: none;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .slide.active {
+      display: block;
+    }
+
+    .slide h2 {
+      margin: 0 0 10px;
+      font-size: 1.1rem;
+    }
+
+    .slide p {
+      margin: 6px 0;
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 8px 0 2px;
+    }
+
+    .pill {
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      color: #374151;
+      font-weight: 500;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .card {
+      border-radius: 14px;
+      background: #ffffff;
+      padding: 12px 12px 10px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .card h3 {
+      margin: 0 0 4px;
+      font-size: 0.98rem;
+    }
+
+    .card p {
+      font-size: 0.88rem;
+    }
+
+    .tag {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 4px;
+      display: inline-block;
+    }
+
+    ul {
+      padding-left: 18px;
+      margin: 6px 0;
+    }
+
+    li {
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+    }
+
+    .scenario-box {
+      border-radius: 14px;
+      background: #ffffff;
+      border: 1px dashed #d1d5db;
+      padding: 10px 12px;
+      font-size: 0.9rem;
+    }
+
+    .question {
+      margin-top: 6px;
+      font-weight: 600;
+    }
+
+    .reveal {
+      margin-top: 8px;
+      display: none;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: var(--accent-soft);
+      font-size: 0.86rem;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+      gap: 8px;
+    }
+
+    .controls-left {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .step-dots {
+      display: flex;
+      gap: 4px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #d1d5db;
+      cursor: pointer;
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+
+    .dot.active {
+      background: var(--accent);
+      transform: scale(1.2);
+    }
+
+    .controls-right {
+      display: flex;
+      gap: 8px;
+    }
+
+    button {
+      border-radius: 999px;
+      border: none;
+      padding: 7px 14px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid #d1d5db;
+      color: #374151;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 6px 20px rgba(37,99,235,0.35);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.78rem;
+      padding: 0;
+    }
+
+    .mini-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 640px) {
+      .app { padding: 18px 14px 16px; }
+      header { flex-direction: column; align-items: flex-start; }
+      header .meta { text-align: left; }
+      .progress-label { display: none; }
+      main { padding: 14px 12px 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="app" role="region" aria-label="Click-through lesson">
+      <header>
+        <h1>
+          Task Performance, OCB &amp; Voice
+          <span class="badge">Mini Lesson</span>
+        </h1>
+        <div class="meta">
+          <div>MAN 3240 – Leadership</div>
+          <div>Click through the slides below</div>
+        </div>
+      </header>
+
+      <div class="progress-bar" aria-hidden="true">
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-label" id="progressLabel">Slide 1 of 5</div>
+      </div>
+
+      <main>
+        <!-- Slide 1 -->
+        <section class="slide active" data-index="0">
+          <h2>Welcome: What Are We Comparing?</h2>
+          <p>
+            In this mini lesson, you’ll learn how to distinguish between:
+          </p>
+          <div class="pill-row">
+            <div class="pill">Routine &amp; Adaptive Task Performance</div>
+            <div class="pill">Organizational Citizenship Behavior (OCB)</div>
+            <div class="pill">Voice Behavior</div>
+          </div>
+          <p class="mini-label">
+            By the end, you should be able to look at a short scenario and identify:
+            “Is this task performance, OCB, or voice?”
+          </p>
+          <ul>
+            <li>Click <strong>Next</strong> to move through the content.</li>
+            <li>Use the dots below to jump around.</li>
+          </ul>
+        </section>
+
+        <!-- Slide 2 -->
+        <section class="slide" data-index="1">
+          <h2>Task Performance</h2>
+          <p>
+            Task performance is about how well someone does the core duties formally
+            required by their job.
+          </p>
+
+          <div class="card-grid">
+            <div class="card">
+              <span class="tag">Routine</span>
+              <h3>Routine Task Performance</h3>
+              <p>
+                Basic, predictable job duties that follow established procedures.
+              </p>
+              <ul>
+                <li>Processing customer orders correctly</li>
+                <li>Showing up on time and prepared</li>
+                <li>Following safety and quality guidelines</li>
+              </ul>
+            </div>
+
+            <div class="card">
+              <span class="tag">Adaptive &amp; Proactive</span>
+              <h3>Adaptive / Proactive Task Performance</h3>
+              <p>
+                Handling change, solving problems, and taking initiative
+                that is still part of “doing your job well.”
+              </p>
+              <ul>
+                <li>Learning a new system quickly</li>
+                <li>Re-prioritizing work when emergencies arise</li>
+                <li>Anticipating an issue and fixing it early</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- Slide 3 -->
+        <section class="slide" data-index="2">
+          <h2>OCB: Going Beyond Formal Requirements</h2>
+          <p>
+            Organizational Citizenship Behaviors (OCBs) are
+            <strong>discretionary, extra-role actions</strong> that help the social and
+            organizational environment.
+          </p>
+
+          <div class="card-grid">
+            <div class="card">
+              <span class="tag">OCB-I</span>
+              <h3>OCB toward Individuals</h3>
+              <p>
+                Helping specific coworkers with their work or well-being.
+              </p>
+              <ul>
+                <li>Staying late to help a teammate finish a report</li>
+                <li>Covering a shift so a coworker can go to an appointment</li>
+                <li>Informally mentoring a new hire</li>
+              </ul>
+            </div>
+            <div class="card">
+              <span class="tag">OCB-O</span>
+              <h3>OCB toward the Organization</h3>
+              <p>
+                Actions that promote the organization as a whole.
+              </p>
+              <ul>
+                <li>Speaking positively about the company to outsiders</li>
+                <li>Volunteering for an internal committee or event</li>
+                <li>Following “unwritten rules” that support the culture</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- Slide 4 -->
+        <section class="slide" data-index="3">
+          <h2>Voice: Speaking Up to Improve the Organization</h2>
+          <p>
+            Voice is a specific, higher-risk type of citizenship behavior:
+            <strong>proactively speaking up with suggestions or concerns</strong> to
+            improve the organization.
+          </p>
+
+          <div class="card-grid">
+            <div class="card">
+              <span class="tag">Promotive Voice</span>
+              <h3>Suggesting Improvements</h3>
+              <p>
+                Offering ideas for new practices, products, or processes.
+              </p>
+              <ul>
+                <li>Proposing a new onboarding process to reduce errors</li>
+                <li>Recommending a better way to schedule shifts</li>
+              </ul>
+            </div>
+            <div class="card">
+              <span class="tag">Prohibitive Voice</span>
+              <h3>Pointing Out Risks or Problems</h3>
+              <p>
+                Calling attention to practices that are inefficient, unsafe, or unfair.
+              </p>
+              <ul>
+                <li>Raising concerns about a safety violation</li>
+                <li>Alerting leadership to unethical sales practices</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- Slide 5 -->
+        <section class="slide" data-index="4">
+          <h2>Practice: What Kind of Behavior Is This?</h2>
+
+          <div class="scenario-box">
+            <strong>Scenario</strong><br />
+            Jordan notices that customers are often confused by the new return
+            policy. After their shift, Jordan stays late (unpaid) to create a simple
+            one-page guide and emails it to the whole team and manager.
+            <p class="question">
+              Is this mainly <em>task performance</em>, <em>OCB-I</em>, <em>OCB-O</em>, or
+              <em>voice</em>?
+            </p>
+            <button class="btn-outline" type="button" id="revealBtn">
+              Show suggested answer
+            </button>
+            <div class="reveal" id="revealBox">
+              <strong>Suggested coding:</strong><br />
+              This is primarily <strong>OCB-O</strong> (going beyond formal duties to
+              help the organization as a whole by improving a process). If Jordan also
+              speaks up in a meeting to propose adopting the guide as a standard
+              process, that part would count as <strong>promotive voice</strong>.
+            </div>
+          </div>
+
+          <p class="mini-label">
+            In class, you can ask students to generate their own examples and label
+            them as task performance, OCB-I, OCB-O, or voice.
+          </p>
+        </section>
+
+        <!-- Controls -->
+        <div class="controls">
+          <div class="controls-left">
+            <div class="step-dots" id="stepDots" aria-hidden="true"></div>
+            <button class="btn-ghost" type="button" id="restartBtn">
+              Restart lesson
+            </button>
+          </div>
+          <div class="controls-right">
+            <button class="btn-outline" type="button" id="prevBtn">
+              ◀ Previous
+            </button>
+            <button class="btn-primary" type="button" id="nextBtn">
+              Next ▶
+            </button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const slides = Array.from(document.querySelectorAll('.slide'));
+      const progressFill = document.getElementById('progressFill');
+      const progressLabel = document.getElementById('progressLabel');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const restartBtn = document.getElementById('restartBtn');
+      const dotsContainer = document.getElementById('stepDots');
+      const revealBtn = document.getElementById('revealBtn');
+      const revealBox = document.getElementById('revealBox');
+
+      let currentIndex = 0;
+      const total = slides.length;
+
+      // Create dots
+      slides.forEach((_, idx) => {
+        const dot = document.createElement('div');
+        dot.className = 'dot';
+        dot.dataset.index = idx;
+        dot.addEventListener('click', () => goToSlide(idx));
+        dotsContainer.appendChild(dot);
+      });
+
+      const dots = Array.from(document.querySelectorAll('.dot'));
+
+      function updateUI() {
+        slides.forEach((slide, idx) =>
+          slide.classList.toggle('active', idx === currentIndex)
+        );
+        dots.forEach((dot, idx) =>
+          dot.classList.toggle('active', idx === currentIndex)
+        );
+
+        const pct = ((currentIndex + 1) / total) * 100;
+        progressFill.style.width = pct + '%';
+        progressLabel.textContent = `Slide ${currentIndex + 1} of ${total}`;
+
+        prevBtn.disabled = currentIndex === 0;
+        nextBtn.disabled = currentIndex === total - 1;
+      }
+
+      function goToSlide(idx) {
+        if (idx < 0 || idx >= total) return;
+        currentIndex = idx;
+        updateUI();
+        // Hide reveal box whenever you move slides
+        if (revealBox) revealBox.style.display = 'none';
+      }
+
+      prevBtn.addEventListener('click', () => goToSlide(currentIndex - 1));
+      nextBtn.addEventListener('click', () => goToSlide(currentIndex + 1));
+      restartBtn.addEventListener('click', () => goToSlide(0));
+
+      if (revealBtn && revealBox) {
+        revealBtn.addEventListener('click', () => {
+          const isVisible = revealBox.style.display === 'block';
+          revealBox.style.display = isVisible ? 'none' : 'block';
+          revealBtn.textContent = isVisible
+            ? 'Show suggested answer'
+            : 'Hide suggested answer';
+        });
+      }
+
+      updateUI();
+    })();
+  </script>
+</body>
+</html>
